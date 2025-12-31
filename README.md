@@ -1,135 +1,223 @@
-# Turborepo starter
+# 🧹 Serviq
 
-This Turborepo starter is maintained by the Turborepo core team.
+A modern open-source ticket management and support system built with TypeScript, featuring automated SLA tracking, email notifications, and a scalable microservices architecture.
 
-## Using this example
+## 📋 Overview
 
-Run the following command:
+Serviq is a comprehensive help desk and ticket management platform that enables organizations to efficiently handle customer support requests. The system includes automated SLA (Service Level Agreement) tracking, email notifications, user management, and a robust permission system.
 
-```sh
-npx create-turbo@latest
-```
+## 🏗️ Architecture
 
-## What's inside?
+This project is a monorepo built with:
+- **Turborepo** for monorepo management
+- **Bun** as the package manager and runtime
+- **TypeScript** for type safety
+- **PostgreSQL** with **Prisma** ORM for data persistence
+- **Redis** with **BullMQ** for job queue management
+- **Express.js** for the REST API
+- **React Email** for email templates
 
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
+## 📁 Project Structure
 
 ```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+Serviq/
+├── apps/
+│   ├── backend/          # Main Express API server
+│   ├── ticket/           # Ticket processing worker
+│   ├── notification/     # Email notification worker
+│   └── sla/              # SLA tracking worker
+├── packages/
+│   ├── prisma/           # Database schema and client
+│   ├── bull/             # Job queue management
+│   ├── config/           # Shared configuration
+│   ├── email/            # Email templates and sending
+│   └── lib/              # Shared utilities
 ```
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+## 🚀 Getting Started
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+### Prerequisites
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+- **Node.js** >= 18
+- **Bun** 1.2.23 (specified package manager)
+- **PostgreSQL** database
+- **Redis** server
 
-### Develop
+### Installation
 
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd Serviq
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+2. Install dependencies:
+```bash
+bun install
 ```
 
-### Remote Caching
+3. Set up environment variables:
+Create a `.env` file in the root directory with the following variables:
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+```env
+# App Settings
+PORT=3000
+ENV=development
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+# Database
+DATABASE_URL=postgresql://user:password@localhost:5432/serviq
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
 
-```
-cd my-turborepo
+# JWT
+JWT_SECRET=your-secret-key
+JWT_TOKEN=your-secret-key
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
+# SMTP
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_LOGIN=your-email@example.com
+SMTP_PASSWORD=your-password
 ```
 
-## Useful Links
+4. Set up the database:
+```bash
+cd packages/prisma
+bun run prisma migrate dev
+bun run prisma generate
+```
 
-Learn more about the power of Turborepo:
+5. Start the development servers:
+```bash
+# Start all services
+bun run dev
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+# Or start individually:
+# Backend API
+cd apps/backend && bun run dev
+
+# Ticket worker
+cd apps/ticket && bun run dev
+
+# Notification worker
+cd apps/notification && bun run dev
+
+# SLA worker
+cd apps/sla && bun run dev
+```
+
+## 🎯 Features
+
+### Core Functionality
+
+- **Ticket Management**
+  - Create, view, and track support tickets
+  - Ticket status workflow (OPEN, IN_PROGRESS, RESOLVED, CLOSED, etc.)
+  - Priority levels (LOW, NORMAL, HIGH, CRITICAL)
+  - Ticket assignment with multiple assignee types (PRIMARY, OBSERVER, COLLABORATOR)
+  - Ticket events and comments
+  - Media attachments support
+
+- **User Management**
+  - External and internal user types
+  - Employee profiles with departments and titles
+  - Permission-based access control
+  - JWT authentication
+  - User timezone support
+
+- **SLA Tracking**
+  - Automated SLA initialization based on ticket priority
+  - First response time tracking
+  - Resolution time tracking
+  - SLA status monitoring (RUNNING, MET, BREACHED)
+  - Configurable SLA policies per priority level
+
+- **Email Notifications**
+  - Ticket creation notifications
+  - Ticket assignment notifications
+  - React-based email templates
+  - SMTP integration
+
+- **Job Queue System**
+  - Asynchronous job processing with BullMQ
+  - Retry mechanisms with exponential backoff
+  - Separate workers for tickets, notifications, and SLA
+
+## 🔌 API Endpoints
+
+### User Routes (`/api/v1/users`)
+
+- `POST /external/ticket` - Create a new ticket (public)
+- `GET /external/ticket/:id` - Get ticket details (public)
+- `POST /auth/signin` - User sign in
+- `POST /auth/signup` - User registration
+
+### Admin Routes (`/api/v1/admin`)
+
+- Protected routes requiring authentication and permissions
+
+## 🗄️ Database Schema
+
+The system uses PostgreSQL with the following main entities:
+
+- **Users** - User accounts (external/internal)
+- **Employees** - Internal employee profiles
+- **Tickets** - Support tickets
+- **TicketSLA** - SLA tracking records
+- **TicketAssignee** - Ticket assignments
+- **TicketEvent** - Ticket history and comments
+- **TicketMedia** - Attachments
+- **Permissions** - Permission definitions
+- **UserPermission** - User permission assignments
+
+## 🛠️ Development
+
+### Available Scripts
+
+- `bun run dev` - Start all services in development mode
+- `bun run build` - Build all packages and apps
+- `bun run lint` - Lint all code
+- `bun run format` - Format code with Prettier
+- `bun run check-types` - Type check all TypeScript code
+
+### Adding New Features
+
+1. **New API Routes**: Add routes in `apps/backend/src/routes/`
+2. **New Workers**: Create worker files in `apps/` directory
+3. **New Jobs**: Define job types in `packages/config/types/bull.ts`
+4. **Database Changes**: Update `packages/prisma/prisma/schema.prisma` and run migrations
+
+## 📦 Packages
+
+### `@serviq/prisma`
+Database client and schema definitions. Provides Prisma client for database operations.
+
+### `@serviq/bull`
+Job queue management. Provides typed queue creation and job scheduling.
+
+### `@serviq/config`
+Shared configuration and environment variables.
+
+### `@serviq/email`
+Email template components and sending functionality using React Email.
+
+### `@serviq/lib`
+Shared utility functions and helpers.
+
+## 🔐 Security
+
+- Password hashing with bcrypt
+- JWT-based authentication
+- Permission-based authorization
+- Input validation on API endpoints
+
+## 📝 License
+
+[Add your license here]
+
+## 🤝 Contributing
+
+[Add contribution guidelines here]
