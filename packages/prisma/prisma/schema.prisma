@@ -1,0 +1,235 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserType {
+  EXTERNAL
+  INTERNAL
+}
+
+model User {
+  id       String  @id @default(uuid())
+  name     String
+  username String? @unique
+  email    String  @unique
+  password String?
+  timezone String  @default("UTC")
+
+  type        UserType         @default(EXTERNAL)
+  permissions UserPermission[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  tickets    Ticket[]
+
+  ticketAssignees TicketAssignee[]
+
+  ticketEvents TicketEvent[]
+  employee     Employee?
+
+  @@map("users")
+}
+
+model Employee {
+  id   String @id
+  user User   @relation(fields: [id], references: [id], onDelete: Cascade)
+
+  department String
+  title      String
+  level      Int
+
+  is_online Boolean @default(false)
+  is_active Boolean @default(true)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("employees")
+}
+
+model Permission {
+  id  String @id @default(uuid())
+  key String @unique()
+
+  users UserPermission[]
+
+  created_at DateTime @default(now())
+
+  @@map("permissions")
+}
+
+model UserPermission {
+  id            String @id @default(uuid())
+  user_id       String
+  permission_id String
+
+  user User @relation(fields: user_id, references: [id], onDelete: Cascade)
+
+  permission Permission @relation(fields: permission_id, references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+
+  @@unique([user_id, permission_id])
+  @@map("user_permissions")
+}
+
+enum TicketStatus {
+  OPEN
+  REOPENED
+  IN_PROGRESS
+  WAITING
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  NORMAL
+  HIGH
+  CRITICAL
+}
+
+model Ticket {
+  id          String         @id @default(uuid())
+  title       String
+  description String
+  status      TicketStatus   @default(OPEN)
+  priority    TicketPriority @default(NORMAL)
+  number      Int            @unique @default(autoincrement())
+
+  author_id String
+  author    User   @relation(fields: [author_id], references: [id])
+
+  assignees TicketAssignee[]
+
+  sla TicketSLA[]
+
+  rating Int?
+
+  events TicketEvent[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([priority])
+  @@index([status])
+  @@index([created_at])
+  @@map("tickets")
+}
+
+enum SLAType {
+  FIRST_RESPONSE
+  RESOLUTION
+}
+
+enum SLAStatus {
+  RUNNING
+  BREACHED
+  MET
+}
+
+model TicketSLA {
+  id        String @id @default(uuid())
+  ticket_id String
+  ticket    Ticket @relation(fields: [ticket_id], references: [id], onDelete: Cascade)
+
+  type   SLAType
+  status SLAStatus @default(RUNNING)
+
+  due_at      DateTime
+  met_at      DateTime?
+  breached_at DateTime?
+
+  created_at DateTime @default(now())
+
+  @@unique([ticket_id, type])
+  @@index([status])
+  @@index([due_at])
+  @@map("ticket_sla")
+}
+
+enum AssigneeType {
+  PRIMARY
+  OBSERVER
+  COLLABORATOR
+}
+
+model TicketAssignee {
+  id String @id @default(uuid())
+
+  ticket_id String
+  ticket    Ticket @relation(fields: [ticket_id], references: [id], onDelete: Cascade)
+
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id])
+
+  role AssigneeType @default(COLLABORATOR)
+
+  created_at DateTime @default(now())
+
+  @@unique([user_id, ticket_id])
+  @@index([ticket_id])
+  @@map("ticket_assignee")
+}
+
+enum TicketEventType {
+  COMMENT
+  STATUS_CHANGE
+  ASSIGNMENT
+  SYSTEM
+}
+
+model TicketEvent {
+  id        String @id @default(uuid())
+  ticket_id String
+  ticket    Ticket @relation(fields: ticket_id, references: [id], onDelete: Cascade)
+
+  author_id String?
+  author    User?   @relation(fields: [author_id], references: [id])
+
+  type TicketEventType
+
+  body String @db.VarChar(5000)
+
+  public Boolean @default(false)
+
+  attachments TicketMedia[]
+
+  created_at DateTime @default(now())
+
+  @@index([ticket_id])
+  @@map("ticket_events")
+}
+
+enum TicketMediaContentType {
+  TEXT
+  IMAGE
+  VIDEO
+  DOCUMENT
+}
+
+model TicketMedia {
+  id String @id @default(uuid())
+
+  event_id String
+  event    TicketEvent @relation(fields: [event_id], references: [id])
+
+  content_type TicketMediaContentType
+  content_url  String
+  file_name    String
+  size         Int
+
+  created_at DateTime @default(now())
+
+  @@map("ticket_media")
+}

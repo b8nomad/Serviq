@@ -1,0 +1,24 @@
+{
+  "name": "@serviq/prisma",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "migrate:dev": "bunx --bun prisma migrate dev",
+    "migrate:deploy": "bunx --bun prisma migrate deploy",
+    "generate": "bunx --bun prisma generate",
+    "studio": "bunx --bun prisma studio"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.2.0",
+    "@prisma/client": "^7.2.0",
+    "dotenv": "^17.2.3",
+    "prisma": "^7.2.0"
+  }
+}
