@@ -5,7 +5,7 @@ import type {
   EmailNotificationJobs,
   Workers,
   SLAJobs,
-} from "../config/types/bull";
+} from "@serviq/config/types";
 
 const createQueues = <Q extends keyof Workers, J extends keyof Workers[Q]>(
   queue: Q,
@@ -31,6 +31,8 @@ export const queues = {
       createQueues("ticket", "created", payload, jobsOpts),
     assign: (payload: TicketJobs["assign"], jobOpts?: JobsOptions) =>
       createQueues("ticket", "assign", payload, jobOpts),
+    event: (payload: TicketJobs["event"], jobOpts?: JobsOptions) =>
+      createQueues("ticket", "event", payload, jobOpts),
   },
   notifications: {
     email: {
@@ -56,5 +58,7 @@ export const queues = {
   sla: {
     initialize: (payload: SLAJobs["initialize"], jobOpts?: JobsOptions) =>
       createQueues("sla", "initialize", payload, jobOpts),
+    breach: (payload: SLAJobs["breach"], jobOpts?: JobsOptions) =>
+      createQueues("sla", "breach", payload, jobOpts),
   },
 };

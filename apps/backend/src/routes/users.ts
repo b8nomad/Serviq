@@ -2,6 +2,7 @@ import { Router } from "express";
 import { queues } from "@serviq/bull";
 
 import prisma from "@serviq/prisma";
+import { auth } from "../middlewares/auth";
 
 const router = Router();
 
@@ -41,12 +42,16 @@ router.post("/external/ticket", async (req, res) => {
   });
 });
 
-router.get("/external/ticket/:id", async (req, res) => {
+router.get("/external/ticket/:id", auth, async (req, res) => {
   const { id } = req.params;
+  const user = req.user;
+
   if (!id) res.status(422).json({ error: "ID invalid!", success: false });
+
   const ticket = prisma.ticket.findFirst({
     where: {
       id,
+      author_id: user.id,
     },
     include: {
       assignees: true,
@@ -54,7 +59,11 @@ router.get("/external/ticket/:id", async (req, res) => {
     },
   });
 
-  res.json({ message: "Ticket fetched successfully!", success: true });
+  res.json({
+    message: "Ticket fetched successfully!",
+    data: { ticket },
+    success: true,
+  });
 });
 
 export default router;

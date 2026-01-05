@@ -177,7 +177,7 @@ model TicketAssignee {
 
   created_at DateTime @default(now())
 
-  @@unique([user_id, ticket_id])
+  @@unique([user_id, ticket_id] )
   @@index([ticket_id])
   @@map("ticket_assignee")
 }
@@ -197,7 +197,7 @@ model TicketEvent {
   author_id String?
   author    User?   @relation(fields: [author_id], references: [id])
 
-  type TicketEventType
+  type TicketEventType @default(COMMENT)
 
   body String @db.VarChar(5000)
 

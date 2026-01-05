@@ -18,7 +18,7 @@ export const REDIS_CRED = {
 };
 
 // JWT OPTIONS
-export const JWT_SECRET = process.env.JWT_SECRET;
+export const JWT_SECRET = process.env.JWT_SECRET || "";
 
 // SMTP CREDENTIALS
 export const SMTP_HOST = process.env.SMTP_HOST;

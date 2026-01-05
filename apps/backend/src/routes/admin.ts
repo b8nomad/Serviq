@@ -6,9 +6,15 @@ import prisma from "@serviq/prisma";
 
 import bcrypt, { genSalt } from "bcrypt";
 
-import { auth, can } from "@/src/middleware";
+import { auth, can } from "@/src/middlewares/auth";
 
-const JWT_SECRET = process.env.JWT_TOKEN!;
+import { catchAsync } from "@serviq/lib/catchAsync.ts";
+import { NotFoundError, UnauthorizedError } from "@serviq/lib/error.ts";
+
+import { JWT_SECRET } from "config";
+
+import { ok } from "@serviq/lib/response.ts";
+import { queues } from "@serviq/bull";
 
 const router = Router();
 
@@ -89,4 +95,93 @@ router.post("/auth/signup", async (req, res) => {
   });
 });
 
+router.get(
+  "/ticket/:id",
+  auth,
+  can("ticket.view", "ticket.view.all"),
+  async (req, res) => {
+    const { id } = req.params;
+    const user = req.user;
+
+    const ticket = await prisma.ticket.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        assignees: true,
+      },
+    });
+
+    if (!ticket) throw new Error("Ticket not found");
+
+    if (user.permissions.includes("ticket.view.all")) {
+      return res.json(
+        ok({ message: "Ticket fetched successfully!", data: { ticket } })
+      );
+    }
+
+    const assigneeList = ticket.assignees.map((ta) => {
+      return ta.user_id;
+    });
+
+    if (assigneeList.includes(user.id)) {
+      res.json(
+        ok({ message: "Ticket fetched successfully!", data: { ticket } })
+      );
+    }
+
+    throw new UnauthorizedError();
+  }
+);
+
+router.post(
+  "/ticket/:id/comment",
+  catchAsync(async (req, res) => {
+    const { id } = req.params;
+    const { body, isPublic } = req.body;
+    const user = req.user;
+
+    const ticket = await prisma.ticket.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        assignees: true,
+      },
+    });
+
+    if (!ticket) throw new NotFoundError("Ticket not found!");
+
+    if (!ticket.assignees.some((s) => s.user_id === user.id))
+      throw new UnauthorizedError("Cannot comment on the ticket!");
+
+    const event = await prisma.ticketEvent.create({
+      data: {
+        ticket_id: ticket?.id,
+        body,
+        public: isPublic,
+        type: "COMMENT",
+      },
+    });
+
+    await prisma.ticket.update({
+      where: {
+        id: ticket.id,
+      },
+      data: {
+        status: "WAITING",
+      },
+    });
+
+    // queues.ticket.event({
+    //   ticket_id: ticket.id,
+    //   author_id: user.id,
+    //   body: "",
+    //   public: true,
+    //   type: "COMMENT",
+    // });
+
+    return res.json(ok({ message: "Event created!", data: { event } }));
+  })
+);
 export default router;

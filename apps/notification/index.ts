@@ -97,7 +97,7 @@ const emailWorker = new Worker(
   async (job) => {
     const handler = handlers[job.name as keyof EmailNotificationJobs];
 
-    if (handlers) return { error: "Invalid handler" };
+    if (!handler) return { error: "Invalid handler" };
 
     await handler(job.data);
 
@@ -109,11 +109,3 @@ const emailWorker = new Worker(
 emailWorker.on("ready", () => {
   console.log("Email worker is ready!");
 });
-
-const smsWorker = new Worker(
-  "notification.sms",
-  async (job) => {
-    //
-  },
-  { connection: REDIS_CRED }
-);

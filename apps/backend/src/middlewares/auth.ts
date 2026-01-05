@@ -62,12 +62,12 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const can = (permission: string) => {
+const can = (...permissions: string[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    const { permissions } = req.user;
-    if (!permissions.includes(permission))
-      return res.status(403).json({ error: "Unauthorized!" });
-    next();
+    permissions.map((permission) => {
+      if (!req.user.permissions.includes(permission))
+        return res.status(403).json({ error: "Unauthorized!" });
+    });
   };
 };
 
