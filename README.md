@@ -1,4 +1,5 @@
 # 🧹 Serviq
+disclaimer (ai-generated-readme)
 
 A modern open-source ticket management and support system built with TypeScript, featuring automated SLA tracking, email notifications, and a scalable microservices architecture.
 
