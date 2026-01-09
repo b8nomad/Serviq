@@ -58,7 +58,5 @@ export const queues = {
   sla: {
     initialize: (payload: SLAJobs["initialize"], jobOpts?: JobsOptions) =>
       createQueues("sla", "initialize", payload, jobOpts),
-    breach: (payload: SLAJobs["breach"], jobOpts?: JobsOptions) =>
-      createQueues("sla", "breach", payload, jobOpts),
   },
 };

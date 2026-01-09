@@ -6,6 +6,10 @@ import prisma, { type Ticket, type TicketSLA } from "@serviq/prisma";
 import { type SLAJobs } from "@serviq/config/types";
 import redis from "@serviq/redis";
 
+import breachCron from "./breach.cron";
+
+breachCron.start();
+
 // Standard Hardcoded SLA Policy (minutes)
 const SLA_POLICY = {
   LOW: { first: 12 * 60, resolution: 4 * 24 * 60 },
@@ -47,7 +51,10 @@ const handlers = {
           due_at: slaDueAt,
         },
       });
-      await redis.zAdd("sla:due", fr.id);
+      await redis.zAdd("sla:due", {
+        score: new Date(slaDueAt).getTime(),
+        value: fr.id,
+      });
     }
 
     if (!existingTypes.has("RESOLUTION")) {
@@ -61,7 +68,10 @@ const handlers = {
           due_at: slaDueAt,
         },
       });
-      await redis.zAdd("sla:due", ra.id);
+      await redis.zAdd("sla:due", {
+        score: new Date(slaDueAt).getTime(),
+        value: ra.id,
+      });
     }
   },
 };

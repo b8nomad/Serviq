@@ -3,7 +3,7 @@ import redis from "@serviq/redis";
 import prisma from "@serviq/prisma";
 
 const breachCron = new CronJob("* * * * *", async () => {
-  const now = new Date().toISOString();
+  const now = Date.now();
 
   const slaIds = await redis.zRangeByScore("sla:due", 0, now);
 
@@ -30,4 +30,4 @@ const breachCron = new CronJob("* * * * *", async () => {
   }
 });
 
-breachCron.start();
+export default breachCron;

@@ -3,6 +3,7 @@ import { queues } from "@serviq/bull";
 
 import prisma from "@serviq/prisma";
 import { auth } from "../middlewares/auth";
+import logger from "@serviq/logger";
 
 const router = Router();
 
